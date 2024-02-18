@@ -42,7 +42,7 @@ router.put('/:_id', async (req, res)=>{
             color: req.body.color
         }, {new: true})
         if (!category){
-            res.status(500).json({success: false, message: "Category was not found"});
+            res.status(400).json({success: false, message: "Category was not found"});
         }
         res.status(200).send(category);
 
