@@ -6,7 +6,13 @@ const mongoose = require("mongoose");
 // http://localhost:4000/api/v1/products
 
 router.get(`/`, async (req, res) =>{
-    const productList = await Product.find().populate('category');
+    let filter = {};
+    if(req.query.categories){
+        filter =  {category: req.query.categories   .split(',')}
+    }
+
+    const productList = await Product.find(filter).populate('category');
+
     if (!productList){
         res.status(500).json({success: false, message: "Products Could Not be Fetched"});
     }
@@ -95,7 +101,7 @@ router.delete('/:_id', async (req,res)=>{
     }
 })
 router.get('/get/count', async (req, res)=>{
-    const productCount = await Product.countDocuments((count)=> count)
+    const productCount = await Product.countDocuments({})
     if (!productCount){
         res.status(404).json({ success: false, message: "Product was not found"})
     }
@@ -103,4 +109,14 @@ router.get('/get/count', async (req, res)=>{
         count: productCount
     })
 })
+router.get('/get/featured/:count', async (req, res)=>{
+    const count = req.params.count ? req.params.count : 0
+    const products = await Product.find({ isFeatured: true}).limit(+count);  
+
+    if (!products){
+        res.status(404).json({ success: false, message: "Product was not found"})
+    }
+    res.status(200).send(products)
+})
+
 module.exports = router;
