@@ -2,6 +2,9 @@ const express = require("express");
 const morgan = require("morgan");
 const mongoose = require("mongoose");
 const app = express();
+const authJwt = require("./helpers/jwt");
+const errorHandler = require("./helpers/error-handler");
+
 const Product = require('./models/product');
 const Category = require('./models/category');
 const User = require('./models/user');
@@ -12,11 +15,12 @@ app.use(cors());
 const api = process.env.API_URL;
 const productsRouter = require('./routers/products');
 const categoryRouter = require('./routers/categories');
-const usersRouter = require('./routers/users')
+const usersRouter = require('./routers/users');
 //MiddleWare
 app.use(express.json());
 app.use(morgan('tiny'));
-
+app.use(authJwt());
+app.use(errorHandler);
 
 //Routers
 app.use(`${api}/products`, productsRouter)
