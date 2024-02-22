@@ -1,5 +1,5 @@
 const express = require("express");
-const router =  express.Router()
+const router =  express.Router();
 const {Product} = require('../models/product');
 const { Category } = require("../models/category");
 const mongoose = require("mongoose");
@@ -10,9 +10,7 @@ router.get(`/`, async (req, res) =>{
     if(req.query.categories){
         filter =  {category: req.query.categories   .split(',')}
     }
-
     const productList = await Product.find(filter).populate('category');
-
     if (!productList){
         res.status(500).json({success: false, message: "Products Could Not be Fetched"});
     }
@@ -110,13 +108,15 @@ router.get('/get/count', async (req, res)=>{
     })
 })
 router.get('/get/featured/:count', async (req, res)=>{
-    const count = req.params.count ? req.params.count : 0
+    const count = req.params.count ? req.params.count : 0;
     const products = await Product.find({ isFeatured: true}).limit(+count);  
-
-    if (!products){
+    try{if (!products){
         res.status(404).json({ success: false, message: "Product was not found"})
     }
     res.status(200).send(products)
+    }catch(err){
+        res.status(500).json({ success: false, error: err})
+    }
 })
 
 module.exports = router;
