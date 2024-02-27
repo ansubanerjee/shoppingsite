@@ -15,6 +15,8 @@ router.get('/', async (req,res)=>{
         res.status(500).json({success: false, error: err})
     }  
 })
+
+
 router.get(`/:_id`, async (req, res) =>{
     const user = await User.findById(req.params._id).select('-passwordHash');
 
@@ -23,6 +25,8 @@ router.get(`/:_id`, async (req, res) =>{
     }
     res.status(200).send(user);
 })
+
+
 
 router.post('/', async (req, res)=>{
     const salt = env.process.salt;
@@ -47,6 +51,8 @@ router.post('/', async (req, res)=>{
         res.status(500).json({ error: err, success: false })
     }
 })
+
+
 
 //Login
 router.post('/login', async (req, res)=>{
@@ -75,6 +81,8 @@ router.post('/login', async (req, res)=>{
     }
 })
 
+
+
 //Register
 router.post('/register', async (req, res)=>{
     const salt = env.process.salt;
@@ -99,5 +107,63 @@ router.post('/register', async (req, res)=>{
         res.status(500).json({ error: err, success: false })
     }
 })
+
+
+
+router.get('/get/count', async (req, res)=>{
+    const userCount = await User.countDocuments((count) => count)
+    if (!userCount){
+        res.status(404).json({ success: false, message: "User was not found"})
+    }
+    res.status(200).send({
+        count: userCount
+    })
+})
+
+
+router.delete('/:_id', async (req,res)=>{
+    const user = await findByIdAndDelete(req.params._id)
+    try{
+        if (!user){
+            res.status(404).json({ success: false, message: "User was not found"})
+        }
+        res.status(200).json({ success: true, message: "User was Deleted"})
+    }catch(err){
+        res.status(400).json({ success: false, error: err})
+    }
+})
+
+router.put('/:_id', async (req, res)=>{
+    const salt = env.process.salt;
+    const userExist = await User.findById(req.params.id);
+    let newPassword
+    if(req.body.password){
+        newPassword = bcrypt.hashSync(req.body.password, salt)
+    } else {
+        newPassword = userExist.passwordHash;
+    }
+    const user = await User.findByIdAndUpdate(
+        req.params._id, 
+        {
+            name: req.body.name,
+            email: req.body.email,
+            phone: req.body.phone,
+            passwordHash: bcrypt.newPassword,
+            street: req.body.street,
+            apartment: req.body.apartment,
+            city: req.body.city,
+            zip: req.body.zip,
+            country: req.body.country,
+            isAdmin: req.body.isAdmin
+        },
+        {new: true})
+
+        if (!user){
+            res.status(400).json({success: false, message: "User was not found"});
+        }
+        res.status(200).send(user);
+
+})
+
 
 module.exports = router;

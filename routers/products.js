@@ -8,7 +8,7 @@ const mongoose = require("mongoose");
 router.get(`/`, async (req, res) =>{
     let filter = {};
     if(req.query.categories){
-        filter =  {category: req.query.categories   .split(',')}
+        filter =  {category: req.query.categories.split(',')}
     }
     const productList = await Product.find(filter).populate('category');
     if (!productList){
@@ -99,7 +99,7 @@ router.delete('/:_id', async (req,res)=>{
     }
 })
 router.get('/get/count', async (req, res)=>{
-    const productCount = await Product.countDocuments({})
+    const productCount = await Product.countDocuments((count) => count)
     if (!productCount){
         res.status(404).json({ success: false, message: "Product was not found"})
     }
@@ -107,6 +107,7 @@ router.get('/get/count', async (req, res)=>{
         count: productCount
     })
 })
+
 router.get('/get/featured/:count', async (req, res)=>{
     const count = req.params.count ? req.params.count : 0;
     const products = await Product.find({ isFeatured: true}).limit(+count);  
