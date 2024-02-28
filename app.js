@@ -8,6 +8,8 @@ const errorHandler = require("./helpers/error-handler");
 const Product = require('./models/product');
 const Category = require('./models/category');
 const User = require('./models/user');
+const Order = require('./models/order');
+const OrderItem = require('./models/order-item');
 const cors = require('cors');
 require('dotenv/config');
 
@@ -16,6 +18,7 @@ const api = process.env.API_URL;
 const productsRouter = require('./routers/products');
 const categoryRouter = require('./routers/categories');
 const usersRouter = require('./routers/users');
+const orderRouter = require('./routers/orders')
 //MiddleWare
 app.use(express.json());
 app.use(morgan('tiny'));
@@ -26,6 +29,9 @@ app.use(errorHandler);
 app.use(`${api}/products`, productsRouter)
 app.use(`${api}/categories`, categoryRouter)
 app.use(`${api}/users`, usersRouter)
+app.use(`${api}/order`, orderRouter)
+
+
 
 mongoose.connect(process.env.connectionstring)
 .then (()=>{
