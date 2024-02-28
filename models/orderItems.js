@@ -18,4 +18,4 @@ orderItemsSchema.virtual('id').get(function (){
 orderItemsSchema.set('toJSON',{
     virtuals: true,
 })
-exports.OrderItems = mongoose.model('Order Items', orderItemsSchema)
+exports.OrderItem = mongoose.model('Order Items', orderItemsSchema)
