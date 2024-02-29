@@ -3,17 +3,33 @@ const router =  express.Router();
 const {Product} = require('../models/product');
 const { Category } = require("../models/category");
 const mongoose = require("mongoose");
-const multer = require('multer')
+const multer = require('multer');
+const { FILE } = require("dns");
 // http://localhost:4000/api/v1/products
+
+const FILE_TYPE_MAP = {
+    'image/png': 'png',
+    'image/jpeg': 'jpeg',
+    'image/jpg': 'jpg'
+
+}
 
 //DISK STORAGE FOR IMAGE 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-      cb(null, 'public/uploads')
+        const isValid = FILE_TYPE_MAP[file.mimetype];
+        let uploadError = new Error('Invalid Image type')
+        if(isValid){
+            uploadError = null
+        }
+
+      cb(uploadError, 'public/uploads')
     },
     filename: function (req, file, cb) {
+        
     const filename = file.originalname.split(' ').join('-');
-    cb(null, filename + '-' + Date.now())
+    const extension = FILE_TYPE_MAP[file.mimetype];
+    cb(null, `${filename}-${Date.now()}.${extension}`)
     }
   })
   
@@ -46,6 +62,11 @@ router.post(`/`, uploadOptions.single('image'), async (req, res) =>{
     if (!category){
         res.status(400).json({success: false, message: "Invalid Category"})
     }
+    const file = req.file;
+    if (!file){
+        res.status(400).json({success: false, message: "No Imagefile in request"})
+    } 
+
     const fileName  = req.file.filename;
     const basePath = `${req.protocol}://${req.get('host')}/public/upload/`;
     const product = new Product({
@@ -82,14 +103,28 @@ router.put('/:_id', async (req, res)=>{
     if (!category){
         res.status(400).json({success: false, message: "Invalid Category"})
     }
+    const productcheck = await Product.findById(req.params.id);
+    if(!productcheck){
+        res.status(400).json({success: false, message: "Invalid Product"})
+    }
 
-    const product = await Product.findByIdAndUpdate(
+    const file = req.file;
+    let imagePath;
+    if (file){
+        const fileName  = req.file.filename;
+        const basePath = `${req.protocol}://${req.get('host')}/public/upload/`;
+        imagePath
+    }else{
+        imagePath = product.image;
+    }
+
+    const updatedProduct = await Product.findByIdAndUpdate(
         req.params._id,
         {
             name: req.body.name,
             description: req.body.description,
             richDescription: req.body.richDescription,
-            image: req.body.image,
+            image: imagePath,
             brand: req.body.brand,
             price: req.body.price,
             category: req.body.category,
@@ -99,11 +134,11 @@ router.put('/:_id', async (req, res)=>{
             isFeatured: req.body.isFeatured
         }, {new: true})
 
-    if (!product){
+    if (!updatedProduct){
         return res.status(500).send('The Product could not be Updated')
     }
-    res.send(product);
-        })
+    res.send(updatedProduct);
+})
 
 router.delete('/:_id', async (req,res)=>{
     const product = await findByIdAndDelete(req.params._id)
@@ -136,6 +171,34 @@ router.get('/get/featured/:count', async (req, res)=>{
     }catch(err){
         res.status(500).json({ success: false, error: err})
     }
+})
+
+router.put('/gallery-images/:_id', uploadOptions.array('images', 10), async (req, res)=>{
+    if(!mongoose.isValidObjectId(req.params._id)){
+        res.status(400).json({success: false, message: "Invalid Product ID"})
+    }
+    
+    const files = req.files
+    let imagePaths = [];
+    const basePath = `${req.protocol}://${req.get('host')}/public/upload/`;
+
+    if (files){
+        files.map(file =>{
+            imagePaths.push(`${basePath}${file.fileName}`);
+        })
+    }
+    
+    const product = await Product.findByIdAndUpdate(
+        req.params.id,
+        {
+            images: imagePaths
+        },
+        {new: true}
+    )
+    if (!product){
+        return res.status(500).send('The Product could not be Updated')
+    }
+    res.send(product);
 })
 
 module.exports = router;
