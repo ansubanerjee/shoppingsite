@@ -45,7 +45,7 @@ router.post('/', async (req, res)=>{
     await user.save();
     try{
         if(!user){
-        return res.status(400).send({ message: "Product could not be created", success: false})
+        return res.status(400).send({ message: "User could not be created", success: false})
         }res.status(201).send(user)
     }catch(err){
         res.status(500).json({ error: err, success: false })
@@ -101,7 +101,7 @@ router.post('/register', async (req, res)=>{
     await user.save();
     try{
         if(!user){
-        return res.status(400).send({ message: "Product could not be created", success: false})
+        return res.status(400).send({ message: "User could not be created", success: false})
         }res.status(201).send(user)
     }catch(err){
         res.status(500).json({ error: err, success: false })
@@ -111,7 +111,7 @@ router.post('/register', async (req, res)=>{
 
 
 router.get('/get/count', async (req, res)=>{
-    const userCount = await User.countDocuments((count) => count)
+    const userCount = await User.countDocuments({})
     if (!userCount){
         res.status(404).json({ success: false, message: "User was not found"})
     }
