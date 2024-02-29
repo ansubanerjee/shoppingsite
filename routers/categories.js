@@ -38,7 +38,7 @@ router.put('/:_id', async (req, res)=>{
         req.params._id, 
         {
             name: req.body.name,
-            icon: req.body.icon,
+            icon: req.body.icon || category.icon,
             color: req.body.color
         }, {new: true})
         if (!category){

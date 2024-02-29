@@ -29,7 +29,7 @@ app.use(errorHandler);
 app.use(`${api}/products`, productsRouter)
 app.use(`${api}/categories`, categoryRouter)
 app.use(`${api}/users`, usersRouter)
-app.use(`${api}/order`, orderRouter)
+app.use(`${api}/orders`, orderRouter)
 
 
 

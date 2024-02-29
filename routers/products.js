@@ -99,7 +99,7 @@ router.delete('/:_id', async (req,res)=>{
     }
 })
 router.get('/get/count', async (req, res)=>{
-    const productCount = await Product.countDocuments((count) => count)
+    const productCount = await Product.countDocuments({})
     if (!productCount){
         res.status(404).json({ success: false, message: "Product was not found"})
     }
